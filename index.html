@@ -10,67 +10,159 @@
   body {
     font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
     background: radial-gradient(ellipse at 50% 30%, #b3202a 0%, #7a1218 55%, #4d0a10 100%);
-    display: flex; flex-direction: column; align-items: center;
-    user-select: none; -webkit-user-select: none;
-    color: #fff;
+    color: #fff; user-select: none; -webkit-user-select: none;
   }
-  /* ---------- 顶部 ---------- */
-  .header { width: 100%; max-width: 480px; padding: 14px 16px 0; }
-  h1 {
-    text-align: center; font-size: 28px; letter-spacing: 4px; font-weight: 900;
+  [hidden] { display: none !important; }
+
+  /* ============ 登录/注册 ============ */
+  #authView {
+    height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; overflow-y: auto;
+  }
+  .auth-logo { font-size: 60px; margin-bottom: 6px; filter: drop-shadow(0 4px 12px rgba(255,200,40,.4)); }
+  .auth-title {
+    font-size: 30px; letter-spacing: 5px; font-weight: 900;
     background: linear-gradient(180deg, #fff8dc 20%, #ffd700 55%, #b8860b 90%);
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 12px rgba(255, 215, 0, .35);
   }
-  .stats { display: flex; gap: 10px; margin-top: 12px; }
+  .auth-sub { font-size: 12px; color: rgba(255,230,160,.7); margin: 8px 0 24px; letter-spacing: 2px; }
+  .auth-box {
+    width: 100%; max-width: 340px; background: rgba(0,0,0,.3);
+    border: 1px solid rgba(255,215,0,.35); border-radius: 18px; padding: 22px 20px;
+  }
+  .auth-tabs { display: flex; margin-bottom: 18px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,215,0,.4); }
+  .auth-tabs button {
+    flex: 1; padding: 10px 0; border: none; background: transparent; color: #ffd98a;
+    font-size: 15px; font-weight: 700; letter-spacing: 3px; cursor: pointer;
+  }
+  .auth-tabs button.on { background: linear-gradient(180deg, #ffe27a, #ffd700); color: #8f1d23; }
+  .field { margin-bottom: 14px; }
+  .field input {
+    width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,215,0,.35);
+    background: rgba(0,0,0,.35); color: #ffeaa7; font-size: 15px; outline: none;
+  }
+  .field input:focus { border-color: #ffd700; box-shadow: 0 0 0 2px rgba(255,215,0,.2); }
+  .field input::placeholder { color: rgba(255,217,138,.45); }
+  .auth-btn {
+    width: 100%; padding: 13px 0; margin-top: 4px; border: none; border-radius: 999px;
+    font-size: 16px; font-weight: 800; letter-spacing: 4px; color: #8f1d23; cursor: pointer;
+    background: linear-gradient(180deg, #fff3b0, #ffd700); box-shadow: 0 4px 12px rgba(0,0,0,.35);
+  }
+  .auth-btn:active { transform: scale(.97); }
+  .auth-msg { min-height: 20px; margin-top: 12px; text-align: center; font-size: 13px; color: #ff9d9d; }
+  .auth-msg.ok { color: #9dffb0; }
+
+  /* ============ 主框架 ============ */
+  #mainView { height: 100%; display: flex; flex-direction: column; }
+  .page { flex: 1; overflow-y: auto; padding-bottom: 8px; }
+  .page-title {
+    text-align: center; font-size: 20px; letter-spacing: 3px; font-weight: 900; padding: 16px 0 4px;
+    color: #ffeaa7;
+  }
+
+  /* 底部导航 */
+  #tabbar {
+    display: flex; flex-shrink: 0;
+    background: rgba(40, 5, 8, .92); border-top: 1px solid rgba(255,215,0,.3);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  #tabbar button {
+    flex: 1; padding: 8px 0 7px; border: none; background: transparent; cursor: pointer;
+    color: rgba(255,217,138,.55); font-size: 11px; letter-spacing: 1px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  #tabbar button .ico { font-size: 21px; filter: grayscale(.6); transition: transform .15s; }
+  #tabbar button.on { color: #ffd700; }
+  #tabbar button.on .ico { filter: none; transform: translateY(-2px); }
+
+  /* ============ 大厅（转盘） ============ */
+  .stats { display: flex; gap: 10px; margin: 10px 16px 0; }
   .stat {
     flex: 1; background: rgba(0,0,0,.28); border: 1px solid rgba(255,215,0,.35);
     border-radius: 12px; padding: 8px 6px; text-align: center;
   }
   .stat .label { font-size: 11px; color: #ffd98a; letter-spacing: 1px; }
   .stat .value { font-size: 19px; font-weight: 800; color: #ffeaa7; margin-top: 2px; font-variant-numeric: tabular-nums; }
-  /* ---------- 转盘区 ---------- */
-  .stage { position: relative; margin-top: 8px; }
+  .stage { display: flex; justify-content: center; margin-top: 10px; }
   .wheel-ring {
     position: relative; padding: 14px; border-radius: 50%;
     background: conic-gradient(#ffd700, #b8860b, #ffec8b, #b8860b, #ffd700, #b8860b, #ffec8b, #ffd700);
-    box-shadow: 0 0 40px rgba(255, 200, 40, .35), inset 0 0 18px rgba(0,0,0,.35);
+    box-shadow: 0 0 40px rgba(255,200,40,.35), inset 0 0 18px rgba(0,0,0,.35);
   }
   .bulbs { position: absolute; inset: 0; pointer-events: none; }
   .bulb {
     position: absolute; width: 10px; height: 10px; border-radius: 50%;
-    background: #fff6c9; box-shadow: 0 0 8px 2px rgba(255, 240, 160, .9);
+    background: #fff6c9; box-shadow: 0 0 8px 2px rgba(255,240,160,.9);
     animation: blink 1s infinite;
   }
   .bulb:nth-child(even) { animation-delay: .5s; }
   @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
   canvas#wheel { display: block; border-radius: 50%; background: #8f1d23; }
-  /* 指针 */
   .pointer {
     position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
     z-index: 5; filter: drop-shadow(0 3px 4px rgba(0,0,0,.4));
   }
-  .pointer svg { display: block; }
-  /* 中心按钮 */
   .hub {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: 86px; height: 86px; border-radius: 50%; z-index: 4;
     background: radial-gradient(circle at 35% 30%, #fff3b0 0%, #ffd700 40%, #d4a017 80%, #a87908 100%);
     border: 4px solid #7a1218; cursor: pointer;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    box-shadow: 0 4px 14px rgba(0,0,0,.45), inset 0 -4px 8px rgba(120, 70, 0, .45);
+    box-shadow: 0 4px 14px rgba(0,0,0,.45), inset 0 -4px 8px rgba(120,70,0,.45);
     transition: transform .12s;
   }
   .hub:active { transform: translate(-50%, -50%) scale(.93); }
   .hub.disabled { filter: grayscale(.7) brightness(.75); cursor: not-allowed; }
   .hub .go { font-size: 22px; font-weight: 900; color: #8f1d23; letter-spacing: 2px; }
   .hub .times { font-size: 10px; color: #8f1d23; opacity: .85; margin-top: 1px; }
-  /* ---------- 底部提示 ---------- */
   .tips {
-    margin-top: 16px; width: 100%; max-width: 480px; padding: 0 16px;
-    text-align: center; font-size: 12px; color: rgba(255, 230, 160, .75); line-height: 1.7;
+    margin-top: 14px; text-align: center; font-size: 12px;
+    color: rgba(255,230,160,.75); line-height: 1.7; padding: 0 16px 10px;
   }
-  /* ---------- 中奖弹窗 ---------- */
+
+  /* ============ 公告 ============ */
+  .notice-list { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
+  .notice {
+    background: rgba(0,0,0,.3); border: 1px solid rgba(255,215,0,.3);
+    border-radius: 14px; padding: 14px 16px;
+  }
+  .notice .n-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .notice .n-title { font-size: 15px; font-weight: 800; color: #ffe27a; }
+  .notice .n-date { font-size: 11px; color: rgba(255,217,138,.55); flex-shrink: 0; }
+  .notice .n-body { font-size: 13px; color: rgba(255,235,180,.85); line-height: 1.8; margin-top: 8px; }
+  .notice .n-body b { color: #ffd700; }
+
+  /* ============ 我的信息 ============ */
+  .me-header {
+    display: flex; align-items: center; gap: 14px; padding: 22px 18px 16px;
+  }
+  .avatar {
+    width: 62px; height: 62px; border-radius: 50%; flex-shrink: 0;
+    background: radial-gradient(circle at 35% 30%, #fff3b0, #ffd700 55%, #b8860b);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 900; color: #8f1d23;
+    border: 3px solid rgba(255,215,0,.6); box-shadow: 0 4px 12px rgba(0,0,0,.4);
+  }
+  .me-name { font-size: 19px; font-weight: 800; color: #ffeaa7; }
+  .me-since { font-size: 11px; color: rgba(255,217,138,.6); margin-top: 4px; }
+  .me-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 4px 16px; }
+  .me-card {
+    background: rgba(0,0,0,.28); border: 1px solid rgba(255,215,0,.3);
+    border-radius: 12px; padding: 13px 10px; text-align: center;
+  }
+  .me-card .v { font-size: 21px; font-weight: 900; color: #ffd700; font-variant-numeric: tabular-nums; }
+  .me-card .k { font-size: 11px; color: #ffd98a; margin-top: 4px; letter-spacing: 1px; }
+  .me-actions { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .me-actions button {
+    width: 100%; padding: 12px 0; border-radius: 12px; cursor: pointer; font-size: 14px;
+    font-weight: 700; letter-spacing: 2px; border: 1px solid rgba(255,215,0,.4);
+    background: rgba(0,0,0,.3); color: #ffe27a;
+  }
+  .me-actions button:active { transform: scale(.98); }
+  .me-actions .danger { color: #ff9d9d; border-color: rgba(255,120,120,.4); }
+  .me-ver { text-align: center; font-size: 11px; color: rgba(255,217,138,.4); padding-bottom: 14px; }
+
+  /* ============ 弹窗 ============ */
   .mask {
     position: fixed; inset: 0; background: rgba(0,0,0,.62); z-index: 50;
     display: flex; align-items: center; justify-content: center;
@@ -79,77 +171,146 @@
   .mask.show { opacity: 1; pointer-events: auto; }
   .modal {
     width: 78%; max-width: 320px; text-align: center; padding: 30px 20px 24px;
-    border-radius: 20px; position: relative;
-    background: linear-gradient(180deg, #c1272d 0%, #8f1d23 100%);
-    border: 2px solid #ffd700;
-    box-shadow: 0 0 50px rgba(255, 200, 40, .45);
-    transform: scale(.7); transition: transform .28s cubic-bezier(.34, 1.56, .64, 1);
+    border-radius: 20px; background: linear-gradient(180deg, #c1272d 0%, #8f1d23 100%);
+    border: 2px solid #ffd700; box-shadow: 0 0 50px rgba(255,200,40,.45);
+    transform: scale(.7); transition: transform .28s cubic-bezier(.34,1.56,.64,1);
   }
   .mask.show .modal { transform: scale(1); }
   .modal .emoji { font-size: 46px; }
   .modal .title { font-size: 20px; font-weight: 800; color: #ffeaa7; margin-top: 8px; letter-spacing: 2px; }
   .modal .amount { font-size: 34px; font-weight: 900; color: #ffd700; margin: 10px 0 4px; text-shadow: 0 2px 8px rgba(0,0,0,.4); }
   .modal .sub { font-size: 13px; color: rgba(255,235,180,.8); }
-  .modal button {
+  .modal button.main {
     margin-top: 20px; padding: 11px 44px; border: none; border-radius: 999px;
     font-size: 16px; font-weight: 800; letter-spacing: 3px; color: #8f1d23; cursor: pointer;
-    background: linear-gradient(180deg, #fff3b0, #ffd700);
-    box-shadow: 0 4px 12px rgba(0,0,0,.35);
+    background: linear-gradient(180deg, #fff3b0, #ffd700); box-shadow: 0 4px 12px rgba(0,0,0,.35);
   }
-  .modal button:active { transform: scale(.95); }
-  /* 撒金币粒子 */
-  .coin-fall {
-    position: fixed; top: -40px; z-index: 60; pointer-events: none; font-size: 26px;
-    animation: fall linear forwards;
-  }
-  @keyframes fall {
-    to { transform: translateY(115vh) rotate(720deg); opacity: .2; }
-  }
-  /* 中奖闪光 */
+  .modal .field input { background: rgba(0,0,0,.3); }
+  .modal .pw-msg { min-height: 18px; font-size: 12px; color: #ffb3b3; margin-top: 6px; }
+  .modal .pw-msg.ok { color: #9dffb0; }
+  .coin-fall { position: fixed; top: -40px; z-index: 60; pointer-events: none; font-size: 26px; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(115vh) rotate(720deg); opacity: .2; } }
   .flash { animation: flash .5s 2; }
   @keyframes flash { 50% { filter: brightness(1.5); } }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>金币大转盘</h1>
-  <div class="stats">
-    <div class="stat"><div class="label">我的金币</div><div class="value" id="balance">0</div></div>
-    <div class="stat"><div class="label">今日剩余次数</div><div class="value" id="chances">3</div></div>
-    <div class="stat"><div class="label">累计抽奖</div><div class="value" id="total">0</div></div>
+<!-- ================= 登录 / 注册 ================= -->
+<div id="authView">
+  <div class="auth-logo">🎰</div>
+  <div class="auth-title">金币大转盘</div>
+  <div class="auth-sub">登 录 后 开 启 你 的 幸 运 之 旅</div>
+  <div class="auth-box">
+    <div class="auth-tabs">
+      <button id="tabLogin" class="on">登录</button>
+      <button id="tabReg">注册</button>
+    </div>
+    <div id="loginForm">
+      <div class="field"><input id="liName" placeholder="用户名" autocomplete="off" maxlength="16"></div>
+      <div class="field"><input id="liPwd" type="password" placeholder="密码" maxlength="32"></div>
+      <button class="auth-btn" id="btnLogin">登 录</button>
+    </div>
+    <div id="regForm" hidden>
+      <div class="field"><input id="rgName" placeholder="用户名（3-16位字母/数字/下划线）" autocomplete="off" maxlength="16"></div>
+      <div class="field"><input id="rgPwd" type="password" placeholder="密码（至少6位）" maxlength="32"></div>
+      <div class="field"><input id="rgPwd2" type="password" placeholder="确认密码" maxlength="32"></div>
+      <button class="auth-btn" id="btnReg">注 册</button>
+    </div>
+    <div class="auth-msg" id="authMsg"></div>
   </div>
 </div>
 
-<div class="stage">
-  <div class="wheel-ring" id="ring">
-    <div class="bulbs" id="bulbs"></div>
-    <canvas id="wheel" width="640" height="640"></canvas>
-    <div class="pointer">
-      <svg width="44" height="52" viewBox="0 0 44 52">
-        <path d="M22 52 L6 18 A18 18 0 1 1 38 18 Z" fill="#ffd700" stroke="#7a1218" stroke-width="3"/>
-        <circle cx="22" cy="14" r="6" fill="#c1272d"/>
-      </svg>
+<!-- ================= 主界面 ================= -->
+<div id="mainView" hidden>
+
+  <!-- 大厅 -->
+  <div class="page" id="pageHall">
+    <div class="page-title">金币大转盘</div>
+    <div class="stats">
+      <div class="stat"><div class="label">我的金币</div><div class="value" id="balance">0</div></div>
+      <div class="stat"><div class="label">今日剩余次数</div><div class="value" id="chances">3</div></div>
+      <div class="stat"><div class="label">累计抽奖</div><div class="value" id="total">0</div></div>
     </div>
-    <div class="hub" id="hub">
-      <div class="go">抽奖</div>
-      <div class="times" id="hubTimes">3/3 次</div>
+    <div class="stage">
+      <div class="wheel-ring" id="ring">
+        <div class="bulbs" id="bulbs"></div>
+        <canvas id="wheel" width="640" height="640"></canvas>
+        <div class="pointer">
+          <svg width="44" height="52" viewBox="0 0 44 52">
+            <path d="M22 52 L6 18 A18 18 0 1 1 38 18 Z" fill="#ffd700" stroke="#7a1218" stroke-width="3"/>
+            <circle cx="22" cy="14" r="6" fill="#c1272d"/>
+          </svg>
+        </div>
+        <div class="hub" id="hub">
+          <div class="go">抽奖</div>
+          <div class="times" id="hubTimes">3/3 次</div>
+        </div>
+      </div>
     </div>
+    <div class="tips">每日免费 3 次机会 · 零点自动重置<br>金币永久绑定账户，试试手气吧！</div>
   </div>
+
+  <!-- 公告 -->
+  <div class="page" id="pageNotice" hidden>
+    <div class="page-title">📢 公告中心</div>
+    <div class="notice-list" id="noticeList"></div>
+  </div>
+
+  <!-- 我的信息 -->
+  <div class="page" id="pageMe" hidden>
+    <div class="me-header">
+      <div class="avatar" id="meAvatar">金</div>
+      <div>
+        <div class="me-name" id="meName">-</div>
+        <div class="me-since" id="meSince">-</div>
+      </div>
+    </div>
+    <div class="me-grid">
+      <div class="me-card"><div class="v" id="meBalance">0</div><div class="k">金币余额</div></div>
+      <div class="me-card"><div class="v" id="meChances">0</div><div class="k">今日剩余次数</div></div>
+      <div class="me-card"><div class="v" id="meTotal">0</div><div class="k">累计抽奖</div></div>
+      <div class="me-card"><div class="v" id="meWins">0</div><div class="k">累计中奖</div></div>
+    </div>
+    <div class="me-actions">
+      <button id="btnChPwd">修改密码</button>
+      <button class="danger" id="btnLogout">退出登录</button>
+    </div>
+    <div class="me-ver">金币大转盘 v1.1.0</div>
+  </div>
+
+  <!-- 底部导航 -->
+  <nav id="tabbar">
+    <button data-page="Hall" class="on"><span class="ico">🏠</span>大厅</button>
+    <button data-page="Notice"><span class="ico">📢</span>公告</button>
+    <button data-page="Me"><span class="ico">👤</span>我的信息</button>
+  </nav>
 </div>
 
-<div class="tips">
-  每日免费 3 次机会 · 零点自动重置<br>
-  金币永久保存，试试手气吧！
-</div>
-
+<!-- 中奖弹窗 -->
 <div class="mask" id="mask">
   <div class="modal">
     <div class="emoji" id="mEmoji">🎉</div>
     <div class="title" id="mTitle">恭喜中奖</div>
     <div class="amount" id="mAmount">+100</div>
     <div class="sub" id="mSub">金币已存入账户</div>
-    <button id="mBtn">开心收下</button>
+    <button class="main" id="mBtn">开心收下</button>
+  </div>
+</div>
+
+<!-- 修改密码弹窗 -->
+<div class="mask" id="pwMask">
+  <div class="modal">
+    <div class="emoji">🔑</div>
+    <div class="title">修改密码</div>
+    <div style="margin-top:16px; text-align:left;">
+      <div class="field"><input id="pwOld" type="password" placeholder="原密码"></div>
+      <div class="field"><input id="pwNew" type="password" placeholder="新密码（至少6位）"></div>
+      <div class="field"><input id="pwNew2" type="password" placeholder="确认新密码"></div>
+    </div>
+    <div class="pw-msg" id="pwMsg"></div>
+    <button class="main" id="pwOk">确认修改</button>
+    <button class="main" id="pwCancel" style="background:rgba(0,0,0,.3); color:#ffe27a; margin-top:10px; box-shadow:none;">取消</button>
   </div>
 </div>
 
@@ -168,22 +329,189 @@
     { label: '500金币', value: 500, weight: 3,  bg: '#c1272d', fg: '#ffeaa7' },
     { label: '200金币', value: 200, weight: 3,  bg: '#ffd23f', fg: '#8f1d23' }
   ];
+  var NOTICES = [
+    { t: '🎉 欢迎来到金币大转盘', d: '2026-10-04', b: '全新账户系统上线！注册登录后，金币、抽奖次数将<b>永久绑定你的账户</b>，换设备登录同一账号数据不丢失（本设备存储）。每日免费 3 次机会，祝好运！' },
+    { t: '📊 中奖概率公示', d: '2026-10-04', b: '10金币 20% · 50金币 16% · 20金币 14% · 100金币 10% · 200金币 3% · <b>500金币 3%</b> · 谢谢参与 34%。抽奖结果由随机数实时生成，公平公正。' },
+    { t: '🎁 每日福利说明', d: '2026-10-04', b: '每天 0 点自动重置 <b>3 次免费抽奖机会</b>，当天有效不累计。记得每天都来试试手气！' },
+    { t: '🔧 v1.1.0 更新日志', d: '2026-10-04', b: '1. 新增注册 / 登录账户系统<br>2. 新增底部导航：大厅 · 公告 · 我的信息<br>3. 新增个人中心：抽奖统计、修改密码<br>4. 优化转盘动画与音效' }
+  ];
   var DAILY_CHANCES = 3;
   var SPIN_MS = 4600;
 
-  /* ================= 状态 ================= */
+  /* ================= 存储层 ================= */
   var store = {
     get: function (k, d) { try { var v = localStorage.getItem('coinwheel_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
     set: function (k, v) { try { localStorage.setItem('coinwheel_' + k, JSON.stringify(v)); } catch (e) {} }
   };
   function today() { return new Date().toDateString(); }
-  var balance = store.get('balance', 0);
-  var totalSpins = store.get('total', 0);
-  var chances = store.get('chances', DAILY_CHANCES);
-  var lastDay = store.get('date', today());
-  if (lastDay !== today()) { chances = DAILY_CHANCES; lastDay = today(); store.set('date', lastDay); store.set('chances', chances); }
+  function hash(str) { // cyrb53，本地口令散列
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57, i, ch;
+    for (i = 0; i < str.length; i++) {
+      ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (h2 >>> 0).toString(16) + (h1 >>> 0).toString(16);
+  }
+  var DB = {
+    users: function () { return store.get('users', {}); },
+    saveUsers: function (u) { store.set('users', u); },
+    userData: function (n) { return store.get('data_' + n, null); },
+    saveUserData: function (n, d) { store.set('data_' + n, d); }
+  };
 
-  /* ================= 元素 ================= */
+  /* ================= 账户状态 ================= */
+  var currentUser = null;
+  var U = null; // {balance, chances, date, total, wins, created}
+
+  function loadUserData(name) {
+    var d = DB.userData(name), legacy;
+    if (!d) {
+      d = { balance: 0, chances: DAILY_CHANCES, date: today(), total: 0, wins: 0, created: Date.now() };
+      legacy = store.get('balance', null); // 旧版匿名数据，迁移给首个注册用户
+      if (legacy !== null && !store.get('legacy_migrated', false)) {
+        d.balance = legacy;
+        d.total = store.get('total', 0);
+        store.set('legacy_migrated', true);
+      }
+      DB.saveUserData(name, d);
+    }
+    if (d.date !== today()) { d.chances = DAILY_CHANCES; d.date = today(); save(); }
+    return d;
+  }
+  function save() { if (currentUser && U) DB.saveUserData(currentUser, U); }
+
+  function enterApp(name) {
+    currentUser = name;
+    U = loadUserData(name);
+    store.set('session', name);
+    document.getElementById('authView').hidden = true;
+    document.getElementById('mainView').hidden = false;
+    document.getElementById('meAvatar').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('meName').textContent = name;
+    document.getElementById('meSince').textContent = '注册于 ' + new Date((DB.users()[name] || {}).created || Date.now()).toLocaleDateString('zh-CN');
+    switchPage('Hall');
+    fit(); drawWheel(); updateUI();
+  }
+  function logout() {
+    save();
+    currentUser = null; U = null;
+    store.set('session', null);
+    document.getElementById('mainView').hidden = true;
+    document.getElementById('authView').hidden = false;
+    setAuthMsg('', true);
+  }
+
+  /* ================= 登录/注册界面 ================= */
+  var authMsg = document.getElementById('authMsg');
+  function setAuthMsg(t, ok) { authMsg.textContent = t; authMsg.className = 'auth-msg' + (ok ? ' ok' : ''); }
+  function switchAuthTab(login) {
+    document.getElementById('tabLogin').className = login ? 'on' : '';
+    document.getElementById('tabReg').className = login ? '' : 'on';
+    document.getElementById('loginForm').hidden = !login;
+    document.getElementById('regForm').hidden = login;
+    setAuthMsg('', true);
+  }
+  document.getElementById('tabLogin').addEventListener('click', function () { switchAuthTab(true); });
+  document.getElementById('tabReg').addEventListener('click', function () { switchAuthTab(false); });
+
+  document.getElementById('btnReg').addEventListener('click', function () {
+    var name = document.getElementById('rgName').value.trim();
+    var pwd = document.getElementById('rgPwd').value;
+    var pwd2 = document.getElementById('rgPwd2').value;
+    var users = DB.users();
+    if (!/^\w{3,16}$/.test(name)) return setAuthMsg('用户名需 3-16 位字母/数字/下划线');
+    if (pwd.length < 6) return setAuthMsg('密码至少 6 位');
+    if (pwd !== pwd2) return setAuthMsg('两次输入的密码不一致');
+    if (users[name]) return setAuthMsg('该用户名已被注册');
+    users[name] = { pwd: hash(pwd + '@coinwheel'), created: Date.now() };
+    DB.saveUsers(users);
+    beep(880, 0.12, 'triangle', 0.08);
+    enterApp(name);
+  });
+
+  document.getElementById('btnLogin').addEventListener('click', function () {
+    var name = document.getElementById('liName').value.trim();
+    var pwd = document.getElementById('liPwd').value;
+    var u = DB.users()[name];
+    if (!name || !pwd) return setAuthMsg('请输入用户名和密码');
+    if (!u) return setAuthMsg('用户不存在，请先注册');
+    if (u.pwd !== hash(pwd + '@coinwheel')) return setAuthMsg('密码错误');
+    beep(880, 0.12, 'triangle', 0.08);
+    enterApp(name);
+  });
+  ['liName', 'liPwd'].forEach(function (id) {
+    document.getElementById(id).addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') document.getElementById('btnLogin').click();
+    });
+  });
+
+  /* ================= 底部导航 ================= */
+  function switchPage(p) {
+    ['Hall', 'Notice', 'Me'].forEach(function (x) {
+      document.getElementById('page' + x).hidden = (x !== p);
+    });
+    var btns = document.querySelectorAll('#tabbar button');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('on', btns[i].dataset.page === p);
+    if (p === 'Hall') { fit(); drawWheel(); updateUI(); }
+    if (p === 'Me') renderMe();
+  }
+  document.querySelectorAll('#tabbar button').forEach(function (b) {
+    b.addEventListener('click', function () { switchPage(b.dataset.page); beep(660, 0.05, 'triangle', 0.04); });
+  });
+
+  /* ================= 公告 ================= */
+  function renderNotices() {
+    var html = '';
+    NOTICES.forEach(function (n) {
+      html += '<div class="notice"><div class="n-head"><div class="n-title">' + n.t +
+        '</div><div class="n-date">' + n.d + '</div></div><div class="n-body">' + n.b + '</div></div>';
+    });
+    document.getElementById('noticeList').innerHTML = html;
+  }
+
+  /* ================= 我的信息 ================= */
+  function renderMe() {
+    if (!U) return;
+    document.getElementById('meBalance').textContent = U.balance;
+    document.getElementById('meChances').textContent = U.chances;
+    document.getElementById('meTotal').textContent = U.total;
+    document.getElementById('meWins').textContent = U.wins;
+  }
+  document.getElementById('btnLogout').addEventListener('click', function () { logout(); });
+  document.getElementById('btnChPwd').addEventListener('click', function () {
+    document.getElementById('pwOld').value = '';
+    document.getElementById('pwNew').value = '';
+    document.getElementById('pwNew2').value = '';
+    setPwMsg('');
+    document.getElementById('pwMask').classList.add('show');
+  });
+  function setPwMsg(t, ok) {
+    var el = document.getElementById('pwMsg');
+    el.textContent = t; el.className = 'pw-msg' + (ok ? ' ok' : '');
+  }
+  document.getElementById('pwCancel').addEventListener('click', function () {
+    document.getElementById('pwMask').classList.remove('show');
+  });
+  document.getElementById('pwOk').addEventListener('click', function () {
+    var oldP = document.getElementById('pwOld').value;
+    var newP = document.getElementById('pwNew').value;
+    var newP2 = document.getElementById('pwNew2').value;
+    var users = DB.users();
+    var rec = users[currentUser];
+    if (!rec || rec.pwd !== hash(oldP + '@coinwheel')) return setPwMsg('原密码不正确');
+    if (newP.length < 6) return setPwMsg('新密码至少 6 位');
+    if (newP !== newP2) return setPwMsg('两次新密码不一致');
+    rec.pwd = hash(newP + '@coinwheel');
+    DB.saveUsers(users);
+    setPwMsg('修改成功！', true);
+    winSound();
+    setTimeout(function () { document.getElementById('pwMask').classList.remove('show'); }, 900);
+  });
+
+  /* ================= 转盘 ================= */
   var canvas = document.getElementById('wheel');
   var ctx = canvas.getContext('2d');
   var hub = document.getElementById('hub');
@@ -193,13 +521,13 @@
   var elHubTimes = document.getElementById('hubTimes');
   var mask = document.getElementById('mask');
   var spinning = false;
-  var rotation = 0; // 当前角度（弧度）
+  var rotation = 0;
+  var N = PRIZES.length;
+  var SECTOR = Math.PI * 2 / N;
 
-  /* ================= 自适应尺寸 ================= */
   function fit() {
-    var size = Math.min(window.innerWidth - 60, window.innerHeight * 0.52, 420);
-    size = Math.max(size, 260);
-    var ring = document.getElementById('ring');
+    var size = Math.min(window.innerWidth - 60, window.innerHeight * 0.44, 400);
+    size = Math.max(size, 240);
     canvas.style.width = size + 'px';
     canvas.style.height = size + 'px';
     placeBulbs(size + 28);
@@ -207,31 +535,25 @@
   function placeBulbs(d) {
     var box = document.getElementById('bulbs');
     box.innerHTML = '';
-    var n = 16, r = d / 2 - 5;
-    for (var i = 0; i < n; i++) {
-      var a = (Math.PI * 2 / n) * i - Math.PI / 2;
-      var b = document.createElement('div');
+    var n = 16, r = d / 2 - 5, i, a, b;
+    for (i = 0; i < n; i++) {
+      a = (Math.PI * 2 / n) * i - Math.PI / 2;
+      b = document.createElement('div');
       b.className = 'bulb';
       b.style.left = (d / 2 + r * Math.cos(a) - 5) + 'px';
       b.style.top = (d / 2 + r * Math.sin(a) - 5) + 'px';
       box.appendChild(b);
     }
   }
-
-  /* ================= 绘制转盘 ================= */
-  var N = PRIZES.length;
-  var SECTOR = Math.PI * 2 / N;
-
   function drawWheel() {
-    var W = canvas.width, C = W / 2, R = C - 8;
+    var W = canvas.width, C = W / 2, R = C - 8, i, p, a0, a1;
     ctx.clearRect(0, 0, W, W);
     ctx.save();
     ctx.translate(C, C);
     ctx.rotate(rotation);
-    for (var i = 0; i < N; i++) {
-      var p = PRIZES[i];
-      var a0 = i * SECTOR, a1 = a0 + SECTOR;
-      // 扇形
+    for (i = 0; i < N; i++) {
+      p = PRIZES[i];
+      a0 = i * SECTOR; a1 = a0 + SECTOR;
       ctx.beginPath();
       ctx.moveTo(0, 0);
       ctx.arc(0, 0, R, a0, a1);
@@ -241,7 +563,6 @@
       ctx.strokeStyle = 'rgba(122,18,24,.5)';
       ctx.lineWidth = 3;
       ctx.stroke();
-      // 文字
       ctx.save();
       ctx.rotate(a0 + SECTOR / 2);
       ctx.textAlign = 'center';
@@ -253,7 +574,6 @@
       ctx.rotate(Math.PI / 2);
       ctx.fillText(p.label, 0, 0);
       ctx.restore();
-      // 金币小图标
       ctx.save();
       ctx.translate(R * 0.34, 0);
       ctx.font = '30px sans-serif';
@@ -261,7 +581,6 @@
       ctx.restore();
       ctx.restore();
     }
-    // 内圈金线
     ctx.beginPath();
     ctx.arc(0, 0, R - 2, 0, Math.PI * 2);
     ctx.strokeStyle = '#ffd700';
@@ -287,60 +606,57 @@
   }
   var tick = function () { beep(1200, 0.05, 'square', 0.04); };
   function winSound() {
-    var seq = [523, 659, 784, 1047];
-    seq.forEach(function (f, i) { setTimeout(function () { beep(f, 0.22, 'triangle', 0.09); }, i * 110); });
+    [523, 659, 784, 1047].forEach(function (f, i) {
+      setTimeout(function () { beep(f, 0.22, 'triangle', 0.09); }, i * 110);
+    });
   }
 
-  /* ================= 抽奖逻辑 ================= */
+  /* ================= 抽奖 ================= */
   function pickPrize() {
-    var sum = 0, i;
+    var sum = 0, i, r;
     for (i = 0; i < N; i++) sum += PRIZES[i].weight;
-    var r = Math.random() * sum;
+    r = Math.random() * sum;
     for (i = 0; i < N; i++) { r -= PRIZES[i].weight; if (r <= 0) return i; }
     return 0;
   }
+  function norm(a) { a %= Math.PI * 2; return a < 0 ? a + Math.PI * 2 : a; }
 
   function updateUI() {
-    elBalance.textContent = balance;
-    elChances.textContent = chances;
-    elTotal.textContent = totalSpins;
-    elHubTimes.textContent = chances + '/' + DAILY_CHANCES + ' 次';
-    hub.classList.toggle('disabled', chances <= 0 || spinning);
+    if (!U) return;
+    elBalance.textContent = U.balance;
+    elChances.textContent = U.chances;
+    elTotal.textContent = U.total;
+    elHubTimes.textContent = U.chances + '/' + DAILY_CHANCES + ' 次';
+    hub.classList.toggle('disabled', U.chances <= 0 || spinning);
   }
 
   function spin() {
-    if (spinning) return;
-    audio(); // 用户手势内激活音频
-    if (chances <= 0) {
+    if (spinning || !U) return;
+    audio();
+    if (U.chances <= 0) {
       showModal('😴', '次数用完', '明天再来', '每日零点重置 3 次机会', '好的');
       return;
     }
     spinning = true;
-    chances--; totalSpins++;
-    store.set('chances', chances); store.set('total', totalSpins);
-    updateUI();
+    U.chances--; U.total++;
+    save(); updateUI();
 
     var idx = pickPrize();
     var prize = PRIZES[idx];
-
-    // 目标：扇区 idx 的中心最终停在指针（正上方 = -90° = 3π/2）
-    // 扇区中心初始角 = idx*SECTOR + SECTOR/2（随转盘旋转 rotation 后位置 = rotation + 该中心）
     var center = idx * SECTOR + SECTOR / 2;
-    var jitter = (Math.random() * 2 - 1) * SECTOR * 0.32; // 扇区内随机偏移
+    var jitter = (Math.random() * 2 - 1) * SECTOR * 0.32;
     var targetMod = norm(3 * Math.PI / 2 - center - jitter);
     var curMod = norm(rotation);
     var delta = norm(targetMod - curMod);
-    var totalDelta = delta + Math.PI * 2 * (5 + Math.floor(Math.random() * 2)); // 多转 5~6 圈
-
+    var totalDelta = delta + Math.PI * 2 * (5 + Math.floor(Math.random() * 2));
     var start = rotation, startT = performance.now();
     var lastSector = Math.floor(norm(3 * Math.PI / 2 - rotation) / SECTOR);
 
     function frame(now) {
       var t = Math.min((now - startT) / SPIN_MS, 1);
-      var e = 1 - Math.pow(1 - t, 4); // easeOutQuart
+      var e = 1 - Math.pow(1 - t, 4);
       rotation = start + totalDelta * e;
       drawWheel();
-      // 经过扇区边界时滴答
       var sec = Math.floor(norm(3 * Math.PI / 2 - rotation) / SECTOR);
       if (sec !== lastSector) { lastSector = sec; if (t < 0.97) tick(); }
       if (t < 1) { requestAnimationFrame(frame); return; }
@@ -349,21 +665,20 @@
     requestAnimationFrame(frame);
   }
 
-  function norm(a) { a %= Math.PI * 2; return a < 0 ? a + Math.PI * 2 : a; }
-
   function finish(prize) {
     spinning = false;
     if (prize.value > 0) {
-      balance += prize.value;
-      store.set('balance', balance);
+      U.balance += prize.value;
+      U.wins++;
+      save();
       winSound();
       rainCoins();
       document.getElementById('ring').classList.add('flash');
       setTimeout(function () { document.getElementById('ring').classList.remove('flash'); }, 1100);
-      showModal('🎉', '恭喜中奖', '+' + prize.value, '金币已存入账户，当前共 ' + balance + ' 枚', '开心收下');
+      showModal('🎉', '恭喜中奖', '+' + prize.value, '金币已存入账户，当前共 ' + U.balance + ' 枚', '开心收下');
     } else {
       beep(330, 0.3, 'sine', 0.06);
-      showModal('🍀', '差一点点', '谢谢参与', '剩余 ' + chances + ' 次机会，再接再厉！', '继续加油');
+      showModal('🍀', '差一点点', '谢谢参与', '剩余 ' + U.chances + ' 次机会，再接再厉！', '继续加油');
     }
     updateUI();
   }
@@ -381,7 +696,6 @@
     mask.classList.remove('show');
     beep(880, 0.08, 'triangle', 0.06);
   });
-
   function rainCoins() {
     var emojis = ['🪙', '💰', '✨', '🪙', '⭐'];
     for (var i = 0; i < 26; i++) {
@@ -402,10 +716,12 @@
 
   /* ================= 启动 ================= */
   hub.addEventListener('click', spin);
-  window.addEventListener('resize', function () { fit(); drawWheel(); });
-  fit();
-  drawWheel();
-  updateUI();
+  window.addEventListener('resize', function () { if (U) { fit(); drawWheel(); } });
+  renderNotices();
+  var sess = store.get('session', null);
+  if (sess && DB.users()[sess]) {
+    enterApp(sess);
+  }
 })();
 </script>
 </body>
