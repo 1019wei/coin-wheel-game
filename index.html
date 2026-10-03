@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>金币大转盘</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: radial-gradient(ellipse at 50% 30%, #b3202a 0%, #7a1218 55%, #4d0a10 100%);
+    display: flex; flex-direction: column; align-items: center;
+    user-select: none; -webkit-user-select: none;
+    color: #fff;
+  }
+  /* ---------- 顶部 ---------- */
+  .header { width: 100%; max-width: 480px; padding: 14px 16px 0; }
+  h1 {
+    text-align: center; font-size: 28px; letter-spacing: 4px; font-weight: 900;
+    background: linear-gradient(180deg, #fff8dc 20%, #ffd700 55%, #b8860b 90%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 12px rgba(255, 215, 0, .35);
+  }
+  .stats { display: flex; gap: 10px; margin-top: 12px; }
+  .stat {
+    flex: 1; background: rgba(0,0,0,.28); border: 1px solid rgba(255,215,0,.35);
+    border-radius: 12px; padding: 8px 6px; text-align: center;
+  }
+  .stat .label { font-size: 11px; color: #ffd98a; letter-spacing: 1px; }
+  .stat .value { font-size: 19px; font-weight: 800; color: #ffeaa7; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  /* ---------- 转盘区 ---------- */
+  .stage { position: relative; margin-top: 8px; }
+  .wheel-ring {
+    position: relative; padding: 14px; border-radius: 50%;
+    background: conic-gradient(#ffd700, #b8860b, #ffec8b, #b8860b, #ffd700, #b8860b, #ffec8b, #ffd700);
+    box-shadow: 0 0 40px rgba(255, 200, 40, .35), inset 0 0 18px rgba(0,0,0,.35);
+  }
+  .bulbs { position: absolute; inset: 0; pointer-events: none; }
+  .bulb {
+    position: absolute; width: 10px; height: 10px; border-radius: 50%;
+    background: #fff6c9; box-shadow: 0 0 8px 2px rgba(255, 240, 160, .9);
+    animation: blink 1s infinite;
+  }
+  .bulb:nth-child(even) { animation-delay: .5s; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+  canvas#wheel { display: block; border-radius: 50%; background: #8f1d23; }
+  /* 指针 */
+  .pointer {
+    position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    z-index: 5; filter: drop-shadow(0 3px 4px rgba(0,0,0,.4));
+  }
+  .pointer svg { display: block; }
+  /* 中心按钮 */
+  .hub {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 86px; height: 86px; border-radius: 50%; z-index: 4;
+    background: radial-gradient(circle at 35% 30%, #fff3b0 0%, #ffd700 40%, #d4a017 80%, #a87908 100%);
+    border: 4px solid #7a1218; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,.45), inset 0 -4px 8px rgba(120, 70, 0, .45);
+    transition: transform .12s;
+  }
+  .hub:active { transform: translate(-50%, -50%) scale(.93); }
+  .hub.disabled { filter: grayscale(.7) brightness(.75); cursor: not-allowed; }
+  .hub .go { font-size: 22px; font-weight: 900; color: #8f1d23; letter-spacing: 2px; }
+  .hub .times { font-size: 10px; color: #8f1d23; opacity: .85; margin-top: 1px; }
+  /* ---------- 底部提示 ---------- */
+  .tips {
+    margin-top: 16px; width: 100%; max-width: 480px; padding: 0 16px;
+    text-align: center; font-size: 12px; color: rgba(255, 230, 160, .75); line-height: 1.7;
+  }
+  /* ---------- 中奖弹窗 ---------- */
+  .mask {
+    position: fixed; inset: 0; background: rgba(0,0,0,.62); z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .25s;
+  }
+  .mask.show { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: 78%; max-width: 320px; text-align: center; padding: 30px 20px 24px;
+    border-radius: 20px; position: relative;
+    background: linear-gradient(180deg, #c1272d 0%, #8f1d23 100%);
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 50px rgba(255, 200, 40, .45);
+    transform: scale(.7); transition: transform .28s cubic-bezier(.34, 1.56, .64, 1);
+  }
+  .mask.show .modal { transform: scale(1); }
+  .modal .emoji { font-size: 46px; }
+  .modal .title { font-size: 20px; font-weight: 800; color: #ffeaa7; margin-top: 8px; letter-spacing: 2px; }
+  .modal .amount { font-size: 34px; font-weight: 900; color: #ffd700; margin: 10px 0 4px; text-shadow: 0 2px 8px rgba(0,0,0,.4); }
+  .modal .sub { font-size: 13px; color: rgba(255,235,180,.8); }
+  .modal button {
+    margin-top: 20px; padding: 11px 44px; border: none; border-radius: 999px;
+    font-size: 16px; font-weight: 800; letter-spacing: 3px; color: #8f1d23; cursor: pointer;
+    background: linear-gradient(180deg, #fff3b0, #ffd700);
+    box-shadow: 0 4px 12px rgba(0,0,0,.35);
+  }
+  .modal button:active { transform: scale(.95); }
+  /* 撒金币粒子 */
+  .coin-fall {
+    position: fixed; top: -40px; z-index: 60; pointer-events: none; font-size: 26px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(115vh) rotate(720deg); opacity: .2; }
+  }
+  /* 中奖闪光 */
+  .flash { animation: flash .5s 2; }
+  @keyframes flash { 50% { filter: brightness(1.5); } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>金币大转盘</h1>
+  <div class="stats">
+    <div class="stat"><div class="label">我的金币</div><div class="value" id="balance">0</div></div>
+    <div class="stat"><div class="label">今日剩余次数</div><div class="value" id="chances">3</div></div>
+    <div class="stat"><div class="label">累计抽奖</div><div class="value" id="total">0</div></div>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="wheel-ring" id="ring">
+    <div class="bulbs" id="bulbs"></div>
+    <canvas id="wheel" width="640" height="640"></canvas>
+    <div class="pointer">
+      <svg width="44" height="52" viewBox="0 0 44 52">
+        <path d="M22 52 L6 18 A18 18 0 1 1 38 18 Z" fill="#ffd700" stroke="#7a1218" stroke-width="3"/>
+        <circle cx="22" cy="14" r="6" fill="#c1272d"/>
+      </svg>
+    </div>
+    <div class="hub" id="hub">
+      <div class="go">抽奖</div>
+      <div class="times" id="hubTimes">3/3 次</div>
+    </div>
+  </div>
+</div>
+
+<div class="tips">
+  每日免费 3 次机会 · 零点自动重置<br>
+  金币永久保存，试试手气吧！
+</div>
+
+<div class="mask" id="mask">
+  <div class="modal">
+    <div class="emoji" id="mEmoji">🎉</div>
+    <div class="title" id="mTitle">恭喜中奖</div>
+    <div class="amount" id="mAmount">+100</div>
+    <div class="sub" id="mSub">金币已存入账户</div>
+    <button id="mBtn">开心收下</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ================= 配置 ================= */
+  var PRIZES = [
+    { label: '10金币',  value: 10,  weight: 20, bg: '#c1272d', fg: '#ffeaa7' },
+    { label: '谢谢参与', value: 0,   weight: 22, bg: '#ffd23f', fg: '#8f1d23' },
+    { label: '50金币',  value: 50,  weight: 16, bg: '#c1272d', fg: '#ffeaa7' },
+    { label: '100金币', value: 100, weight: 10, bg: '#ffd23f', fg: '#8f1d23' },
+    { label: '20金币',  value: 20,  weight: 14, bg: '#c1272d', fg: '#ffeaa7' },
+    { label: '谢谢参与', value: 0,   weight: 12, bg: '#ffd23f', fg: '#8f1d23' },
+    { label: '500金币', value: 500, weight: 3,  bg: '#c1272d', fg: '#ffeaa7' },
+    { label: '200金币', value: 200, weight: 3,  bg: '#ffd23f', fg: '#8f1d23' }
+  ];
+  var DAILY_CHANCES = 3;
+  var SPIN_MS = 4600;
+
+  /* ================= 状态 ================= */
+  var store = {
+    get: function (k, d) { try { var v = localStorage.getItem('coinwheel_' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set: function (k, v) { try { localStorage.setItem('coinwheel_' + k, JSON.stringify(v)); } catch (e) {} }
+  };
+  function today() { return new Date().toDateString(); }
+  var balance = store.get('balance', 0);
+  var totalSpins = store.get('total', 0);
+  var chances = store.get('chances', DAILY_CHANCES);
+  var lastDay = store.get('date', today());
+  if (lastDay !== today()) { chances = DAILY_CHANCES; lastDay = today(); store.set('date', lastDay); store.set('chances', chances); }
+
+  /* ================= 元素 ================= */
+  var canvas = document.getElementById('wheel');
+  var ctx = canvas.getContext('2d');
+  var hub = document.getElementById('hub');
+  var elBalance = document.getElementById('balance');
+  var elChances = document.getElementById('chances');
+  var elTotal = document.getElementById('total');
+  var elHubTimes = document.getElementById('hubTimes');
+  var mask = document.getElementById('mask');
+  var spinning = false;
+  var rotation = 0; // 当前角度（弧度）
+
+  /* ================= 自适应尺寸 ================= */
+  function fit() {
+    var size = Math.min(window.innerWidth - 60, window.innerHeight * 0.52, 420);
+    size = Math.max(size, 260);
+    var ring = document.getElementById('ring');
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+    placeBulbs(size + 28);
+  }
+  function placeBulbs(d) {
+    var box = document.getElementById('bulbs');
+    box.innerHTML = '';
+    var n = 16, r = d / 2 - 5;
+    for (var i = 0; i < n; i++) {
+      var a = (Math.PI * 2 / n) * i - Math.PI / 2;
+      var b = document.createElement('div');
+      b.className = 'bulb';
+      b.style.left = (d / 2 + r * Math.cos(a) - 5) + 'px';
+      b.style.top = (d / 2 + r * Math.sin(a) - 5) + 'px';
+      box.appendChild(b);
+    }
+  }
+
+  /* ================= 绘制转盘 ================= */
+  var N = PRIZES.length;
+  var SECTOR = Math.PI * 2 / N;
+
+  function drawWheel() {
+    var W = canvas.width, C = W / 2, R = C - 8;
+    ctx.clearRect(0, 0, W, W);
+    ctx.save();
+    ctx.translate(C, C);
+    ctx.rotate(rotation);
+    for (var i = 0; i < N; i++) {
+      var p = PRIZES[i];
+      var a0 = i * SECTOR, a1 = a0 + SECTOR;
+      // 扇形
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, R, a0, a1);
+      ctx.closePath();
+      ctx.fillStyle = p.bg;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(122,18,24,.5)';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      // 文字
+      ctx.save();
+      ctx.rotate(a0 + SECTOR / 2);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = p.fg;
+      ctx.font = '900 34px "PingFang SC","Microsoft YaHei",sans-serif';
+      ctx.save();
+      ctx.translate(R * 0.62, 0);
+      ctx.rotate(Math.PI / 2);
+      ctx.fillText(p.label, 0, 0);
+      ctx.restore();
+      // 金币小图标
+      ctx.save();
+      ctx.translate(R * 0.34, 0);
+      ctx.font = '30px sans-serif';
+      ctx.fillText(p.value > 0 ? '🪙' : '🍀', 0, 0);
+      ctx.restore();
+      ctx.restore();
+    }
+    // 内圈金线
+    ctx.beginPath();
+    ctx.arc(0, 0, R - 2, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 5;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /* ================= 音效 ================= */
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var ac = null;
+  function audio() { if (!ac && AC) { try { ac = new AC(); } catch (e) {} } return ac; }
+  function beep(freq, dur, type, vol) {
+    var a = audio(); if (!a) return;
+    try {
+      var o = a.createOscillator(), g = a.createGain();
+      o.type = type || 'square'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol || 0.05, a.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + dur);
+      o.connect(g); g.connect(a.destination);
+      o.start(); o.stop(a.currentTime + dur);
+    } catch (e) {}
+  }
+  var tick = function () { beep(1200, 0.05, 'square', 0.04); };
+  function winSound() {
+    var seq = [523, 659, 784, 1047];
+    seq.forEach(function (f, i) { setTimeout(function () { beep(f, 0.22, 'triangle', 0.09); }, i * 110); });
+  }
+
+  /* ================= 抽奖逻辑 ================= */
+  function pickPrize() {
+    var sum = 0, i;
+    for (i = 0; i < N; i++) sum += PRIZES[i].weight;
+    var r = Math.random() * sum;
+    for (i = 0; i < N; i++) { r -= PRIZES[i].weight; if (r <= 0) return i; }
+    return 0;
+  }
+
+  function updateUI() {
+    elBalance.textContent = balance;
+    elChances.textContent = chances;
+    elTotal.textContent = totalSpins;
+    elHubTimes.textContent = chances + '/' + DAILY_CHANCES + ' 次';
+    hub.classList.toggle('disabled', chances <= 0 || spinning);
+  }
+
+  function spin() {
+    if (spinning) return;
+    audio(); // 用户手势内激活音频
+    if (chances <= 0) {
+      showModal('😴', '次数用完', '明天再来', '每日零点重置 3 次机会', '好的');
+      return;
+    }
+    spinning = true;
+    chances--; totalSpins++;
+    store.set('chances', chances); store.set('total', totalSpins);
+    updateUI();
+
+    var idx = pickPrize();
+    var prize = PRIZES[idx];
+
+    // 目标：扇区 idx 的中心最终停在指针（正上方 = -90° = 3π/2）
+    // 扇区中心初始角 = idx*SECTOR + SECTOR/2（随转盘旋转 rotation 后位置 = rotation + 该中心）
+    var center = idx * SECTOR + SECTOR / 2;
+    var jitter = (Math.random() * 2 - 1) * SECTOR * 0.32; // 扇区内随机偏移
+    var targetMod = norm(3 * Math.PI / 2 - center - jitter);
+    var curMod = norm(rotation);
+    var delta = norm(targetMod - curMod);
+    var totalDelta = delta + Math.PI * 2 * (5 + Math.floor(Math.random() * 2)); // 多转 5~6 圈
+
+    var start = rotation, startT = performance.now();
+    var lastSector = Math.floor(norm(3 * Math.PI / 2 - rotation) / SECTOR);
+
+    function frame(now) {
+      var t = Math.min((now - startT) / SPIN_MS, 1);
+      var e = 1 - Math.pow(1 - t, 4); // easeOutQuart
+      rotation = start + totalDelta * e;
+      drawWheel();
+      // 经过扇区边界时滴答
+      var sec = Math.floor(norm(3 * Math.PI / 2 - rotation) / SECTOR);
+      if (sec !== lastSector) { lastSector = sec; if (t < 0.97) tick(); }
+      if (t < 1) { requestAnimationFrame(frame); return; }
+      finish(prize);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function norm(a) { a %= Math.PI * 2; return a < 0 ? a + Math.PI * 2 : a; }
+
+  function finish(prize) {
+    spinning = false;
+    if (prize.value > 0) {
+      balance += prize.value;
+      store.set('balance', balance);
+      winSound();
+      rainCoins();
+      document.getElementById('ring').classList.add('flash');
+      setTimeout(function () { document.getElementById('ring').classList.remove('flash'); }, 1100);
+      showModal('🎉', '恭喜中奖', '+' + prize.value, '金币已存入账户，当前共 ' + balance + ' 枚', '开心收下');
+    } else {
+      beep(330, 0.3, 'sine', 0.06);
+      showModal('🍀', '差一点点', '谢谢参与', '剩余 ' + chances + ' 次机会，再接再厉！', '继续加油');
+    }
+    updateUI();
+  }
+
+  /* ================= 弹窗 & 特效 ================= */
+  function showModal(emoji, title, amount, sub, btn) {
+    document.getElementById('mEmoji').textContent = emoji;
+    document.getElementById('mTitle').textContent = title;
+    document.getElementById('mAmount').textContent = amount;
+    document.getElementById('mSub').textContent = sub;
+    document.getElementById('mBtn').textContent = btn;
+    mask.classList.add('show');
+  }
+  document.getElementById('mBtn').addEventListener('click', function () {
+    mask.classList.remove('show');
+    beep(880, 0.08, 'triangle', 0.06);
+  });
+
+  function rainCoins() {
+    var emojis = ['🪙', '💰', '✨', '🪙', '⭐'];
+    for (var i = 0; i < 26; i++) {
+      (function (i) {
+        setTimeout(function () {
+          var c = document.createElement('div');
+          c.className = 'coin-fall';
+          c.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          c.style.left = Math.random() * 96 + 'vw';
+          c.style.fontSize = (18 + Math.random() * 22) + 'px';
+          c.style.animationDuration = (1.4 + Math.random() * 1.6) + 's';
+          document.body.appendChild(c);
+          setTimeout(function () { c.remove(); }, 3200);
+        }, i * 70);
+      })(i);
+    }
+  }
+
+  /* ================= 启动 ================= */
+  hub.addEventListener('click', spin);
+  window.addEventListener('resize', function () { fit(); drawWheel(); });
+  fit();
+  drawWheel();
+  updateUI();
+})();
+</script>
+</body>
+</html>
